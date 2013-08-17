@@ -2,6 +2,8 @@ var http = require('http'),
     fs = require('fs'),
     url = require('url');
 
+var players = 1;
+
 // Send index.html to all requests
 var app = http.createServer(function(req, res) {
   var path = url.parse(req.url, true).path;
@@ -19,8 +21,10 @@ var io = require('socket.io').listen(app);
 // Emit welcome message on connection
 io.sockets.on('connection', function(socket) {
     io.sockets.emit('welcome', { message: 'Welcome!' });
-
-    socket.on('i am client', console.log);
+    socket.emit('playerId', {playerId: players++});
+    socket.on('collision', function(data) {
+      io.sockets.emit('collision', {playerId: data.playerId, currentScore: data.currentScore});
+    });
 });
 
 app.listen(3000);

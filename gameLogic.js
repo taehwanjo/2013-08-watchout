@@ -2,20 +2,50 @@ var highScore = 0;
 var currentScore = 0;
 var hero;
 var enemies;
-
+var gameLoop;
+var playerId;
 //socket io here
 var socket = io.connect('//localhost:3000');
 
 socket.on('welcome', function(data) {
-    console.log(data);
-    socket.emit('i am client', {data: 'foo!'});
-    startNewGame();
+  startNewGame(enemyPositions());
 });
 
+socket.on('playerId', function(data) {playerId = data.playerId;});
 socket.on('error', function() { console.error(arguments); });
 socket.on('message', function() { console.log(arguments); });
 
+socket.on('collision', function(data) {
+  if (highScore < data.currentScore) highScore = data.currentScore;
+  currentScore = 0;
+  updateHighScore();
+  if(data.playerId === playerId) {
+    displayMessage('You Messed Up');
+  }
+  else {
+    displayMessage('Another Player Messed Up');
+  }
+});
+
 setInterval(function(){updateScore(); }, 50);
+
+var displayMessage = function(message) {
+  var msg = d3.select('svg')
+      .selectAll('.message')
+      .data(message);
+
+   msg.enter().append('text');
+
+   msg.attr('x', 360)
+      .attr('y', 220)
+      .attr('fill', 'red')
+      .attr('class', 'message')
+      .text(message)
+      .transition()
+      .duration(2000)
+      .delay(1000)
+      .text('');
+};
 
 var updateScore = function() {
   currentScore++;
@@ -66,9 +96,7 @@ var checkCollision = function() {
     heroY = hero.attr('cy');
 
     if (Math.abs(heroX - enemyX) < 20 && Math.abs(heroY - enemyY) < 20) {
-      if (highScore < currentScore) highScore = currentScore;
-      currentScore = 0;
-      updateHighScore();
+      socket.emit('collision', {playerId: playerId, currentScore: currentScore});
     }
   };
 };
@@ -84,7 +112,6 @@ var enemyPositions = function() {
 
 
 var createHero = function(data) {
-  console.log(data);
   hero = d3.select('svg')
       .selectAll('.hero')
       .data(data);
@@ -96,7 +123,6 @@ var createHero = function(data) {
       .attr('fill', 'red')
       .attr('class', 'hero')
       .call(d3.behavior.drag().on("drag", move));
-
 };
 
 var move = function(){
@@ -107,8 +133,25 @@ var move = function(){
 };
 
 var startNewGame = function(data) {
+  clearInterval(gameLoop);
   enemies = d3.select('svg')
-      .selectAll('.enemy');
+      .selectAll('.enemy')
+      .data({})
+      .exit()
+      .remove();
+
+  enemies = d3.select('svg')
+      .selectAll('.enemy')
+      .data(data)
+      .enter()
+      .append('circle');
+
+  enemies.attr('r', '0')
+      .attr('cx', function(d){ return d.x; })
+      .attr('cy', function(d) { return d.y; })
+      .transition()
+      .attr('r', '10')
+      .attr('class', 'enemy');
 
   highScore = 0;
   updateHighScore();
@@ -116,24 +159,13 @@ var startNewGame = function(data) {
 
   createHero([{}]);
 
-  console.log('enemies ' + enemies);
-  enemies.data(data).enter().append('circle')
-      .attr('r', '0')
-      .attr('cx', function(d){ return d.x; })
-      .attr('cy', function(d) { return d.y; })
-      .transition()
-      .attr('r', '10')
-      .attr('class', 'enemy');
+  gameLoop = setInterval(function() {
+    console.log('still looping');
+    updateEnemies(enemyPositions());
+  }, 1500);
 };
 
-startNewGame(enemyPositions());
 
-hero = d3.select('.hero');
-d3.select('.highScore').text(highScore);
-
-setInterval(function() {
-  updateEnemies(enemyPositions());
-}, 1500);
 
 
 
