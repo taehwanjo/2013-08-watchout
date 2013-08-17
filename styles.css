@@ -7,10 +7,8 @@
      height: 0;
      }
 .clearfix { display: inline-block; }
-/* start commented backslash hack \*/
 * html .clearfix { height: 1%; }
 .clearfix { display: block; }
-/* close commented backslash hack */
 
 body {
   background-image: url('http://latentflip.com/LearningD3/collider/bo_play.png');

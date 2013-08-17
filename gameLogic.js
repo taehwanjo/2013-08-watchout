@@ -1,34 +1,21 @@
 var highScore = 0;
 var currentScore = 0;
 var hero;
+var enemies;
 
-setInterval(function(){updateScore();}, 50);
+setInterval(function(){updateScore(); }, 50);
 
 var updateScore = function() {
   currentScore++;
-  var score = d3.select('.currentScore')
-      .selectAll('text')
-      .data(currentScore.toString());
-
-      score.enter().append('text')
-      .text(function(d){return d;});
-
-      score.transition().text(function(d){return d;});
+  d3.select('.currentScore').text(currentScore);
 };
 
 var updateHighScore = function() {
-  var highscore = d3.select('.highScore')
-      .selectAll('text')
-      .data(highScore.toString());
-
-      highscore.enter().append('text')
-      .text(function(d){return d;});
-
-      highscore.transition().text(function(d){return d;});
+  d3.select('.highScore').text(highScore);
 };
 
 var updateEnemies = function(data) {
-  var enemies = d3.select('svg')
+  enemies = d3.select('svg')
       .selectAll('.enemy')
       .data(data);
 
@@ -40,28 +27,34 @@ var updateEnemies = function(data) {
       .attr('r', '10')
       .attr('class', 'enemy');
 
+
   enemies.transition()
       .duration(1000)
       .delay(400)
-      .attr('cx', function(d){ return d.x; })
+      .attr('cx', function(d) { return d.x; })
       .attr('cy', function(d) { return d.y; })
       .tween('custom', checkCollision);
+
 };
 
+
+
 var checkCollision = function() {
-  var enemy = d3.select(this);
-  var enemyX = enemy.attr('cx');
-  var enemyY = enemy.attr('cy');
+  return function() {
+    var enemy = d3.select(this);
+    var enemyX = enemy.attr('cx');
+    var enemyY = enemy.attr('cy');
 
-  heroX = hero.attr('cx');
-  heroY = hero.attr('cy');
+    heroX = hero.attr('cx');
+    heroY = hero.attr('cy');
 
-  if (Math.abs(heroX - enemyX) < 20 && Math.abs(heroY - enemyY) < 20) {
-    if (highScore < currentScore) highScore = currentScore;
-    currentScore = 0;
-    updateHighScore();
-  }
-
+    if (Math.abs(heroX - enemyX) < 20 && Math.abs(heroY - enemyY) < 20) {
+      if (highScore < currentScore) highScore = currentScore;
+      console.log("collision");
+      currentScore = 0;
+      updateHighScore();
+    }
+  };
 };
 
 var enemyPositions = function() {
@@ -89,7 +82,6 @@ var createHero = function(data) {
       .call(d3.behavior.drag().on("drag", move));
 
 };
-  hero = d3.select('.hero');
 
 var move = function(){
     var dragTarget = d3.select(this);
@@ -100,7 +92,8 @@ var move = function(){
 
 createHero([{}]);
 
-console.log(hero);
+hero = d3.select('.hero');
+d3.select('.highScore').text(highScore);
 
 updateEnemies(enemyPositions());
 setInterval(function() {
