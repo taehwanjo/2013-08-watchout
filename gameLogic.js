@@ -3,6 +3,18 @@ var currentScore = 0;
 var hero;
 var enemies;
 
+//socket io here
+var socket = io.connect('//localhost:3000');
+
+socket.on('welcome', function(data) {
+    console.log(data);
+    socket.emit('i am client', {data: 'foo!'});
+    startNewGame();
+});
+
+socket.on('error', function() { console.error(arguments); });
+socket.on('message', function() { console.log(arguments); });
+
 setInterval(function(){updateScore(); }, 50);
 
 var updateScore = function() {
@@ -15,18 +27,7 @@ var updateHighScore = function() {
 };
 
 var updateEnemies = function(data) {
-  enemies = d3.select('svg')
-      .selectAll('.enemy')
-      .data(data);
-
-  enemies.enter().append('circle')
-      .attr('r', '0')
-      .attr('cx', function(d){ return d.x; })
-      .attr('cy', function(d) { return d.y; })
-      .transition()
-      .attr('r', '10')
-      .attr('class', 'enemy');
-
+  enemies.data(data);
 
   enemies.transition()
       .duration(1000)
@@ -66,7 +67,6 @@ var checkCollision = function() {
 
     if (Math.abs(heroX - enemyX) < 20 && Math.abs(heroY - enemyY) < 20) {
       if (highScore < currentScore) highScore = currentScore;
-      console.log("collision");
       currentScore = 0;
       updateHighScore();
     }
@@ -106,12 +106,31 @@ var move = function(){
         .attr("cy", function(){return d3.event.dy + parseInt(dragTarget.attr("cy"))});
 };
 
-createHero([{}]);
+var startNewGame = function(data) {
+  enemies = d3.select('svg')
+      .selectAll('.enemy');
+
+  highScore = 0;
+  updateHighScore();
+  currentScore = 0;
+
+  createHero([{}]);
+
+  console.log('enemies ' + enemies);
+  enemies.data(data).enter().append('circle')
+      .attr('r', '0')
+      .attr('cx', function(d){ return d.x; })
+      .attr('cy', function(d) { return d.y; })
+      .transition()
+      .attr('r', '10')
+      .attr('class', 'enemy');
+};
+
+startNewGame(enemyPositions());
 
 hero = d3.select('.hero');
 d3.select('.highScore').text(highScore);
 
-updateEnemies(enemyPositions());
 setInterval(function() {
   updateEnemies(enemyPositions());
 }, 1500);
