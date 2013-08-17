@@ -35,6 +35,22 @@ var updateEnemies = function(data) {
       .attr('cy', function(d) { return d.y; })
       .tween('custom', checkCollision);
 
+  //       enemies.enter().append('rect')
+  //     .attr('x', function(d){ return d.x; })
+  //     .attr('y', function(d) { return d.y; })
+  //     .attr('width', 20)
+  //     .attr('height', 20)
+  //     .transition()
+  //     .attr('class', 'enemy');
+
+
+  // enemies.transition()
+  //     .duration(1000)
+  //     .delay(400)
+  //     .attr('x', function(d) { return d.x; })
+  //     .attr('y', function(d) { return d.y; });
+  //     .tween('custom', checkCollision);
+
 };
 
 

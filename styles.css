@@ -53,3 +53,22 @@ body {
   width: 720px;
   margin: 0 40px 40px 40px;
 }
+/*
+@-webkit-keyframes rotate {
+  from {
+    -webkit-transform: rotate(0deg);
+  }
+  to {
+    -webkit-transform: rotate(360deg);
+  }
+}
+
+.enemy {
+  height: 20px;
+  width: 20px;
+  -webkit-transform: translate(-10px, -10px );
+    -webkit-animation-name:             rotate;
+    -webkit-animation-duration:         0.5s;
+    -webkit-animation-iteration-count:  infinite;
+    -webkit-animation-timing-function: linear;
+}*/
